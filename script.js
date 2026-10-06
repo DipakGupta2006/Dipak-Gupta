@@ -210,19 +210,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Projects Carousel Logic ---
+        // --- Projects Carousel Logic ---
     const slider = document.getElementById('projects-slider');
     const prevBtn = document.getElementById('prev-project');
     const nextBtn = document.getElementById('next-project');
 
     if (slider && prevBtn && nextBtn) {
-        const scrollAmount = 400; // Scroll amount in pixels
+        const cards = slider.querySelectorAll('.project-card');
+        const counter = document.createElement('div');
+        counter.className = 'project-counter';
+        slider.parentElement.appendChild(counter);
 
-        prevBtn.addEventListener('click', () => {
-            slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-        });
+        const pageWidth = () => {
+            const gap = parseFloat(getComputedStyle(slider).columnGap) || 32;
+            return cards[0].getBoundingClientRect().width + gap;
+        };
+        const pad = n => String(n).padStart(2, '0');
+        const update = () => {
+            const i = Math.min(cards.length - 1, Math.round(slider.scrollLeft / pageWidth()));
+            counter.textContent = pad(i + 1) + ' / ' + pad(cards.length);
+            prevBtn.style.opacity = i === 0 ? '.4' : '1';
+            nextBtn.style.opacity = i === cards.length - 1 ? '.4' : '1';
+        };
 
-        nextBtn.addEventListener('click', () => {
-            slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-        });
+        prevBtn.addEventListener('click', () => slider.scrollBy({ left: -pageWidth(), behavior: 'smooth' }));
+        nextBtn.addEventListener('click', () => slider.scrollBy({ left: pageWidth(), behavior: 'smooth' }));
+        slider.addEventListener('scroll', update, { passive: true });
+        window.addEventListener('resize', update);
+        update();
     }
 });

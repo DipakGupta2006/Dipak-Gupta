@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap');
+
 :root {
     --bg-color: #e9edf3;
     --ink: #10131a;
@@ -995,3 +997,119 @@ footer {
     font-weight: 800
 }
 
+/* ===== Skills: sticky notes ===== */
+.skills-grid{gap:3.2rem 2.4rem;padding:1.2rem 6px 0}
+
+.skill-card-elegant{position:relative;border-radius:4px 4px 4px 26px;padding:2rem 1.5rem 1.6rem;gap:1rem;transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s;transform:rotate(-1.6deg)}
+.skill-card-elegant:nth-child(even){transform:rotate(1.4deg)}
+.skill-card-elegant:nth-child(4n+3){transform:rotate(1.9deg)}
+.skill-card-elegant:nth-child(4n+4){transform:rotate(-1.1deg)}
+.skill-card-elegant:hover{transform:rotate(0) translateY(-8px) scale(1.015);box-shadow:9px 11px 0 var(--ink);z-index:5}
+
+/* light paper shine on top of each color */
+.skills-grid .skill-card-elegant{background-image:linear-gradient(rgba(255,255,255,.4),rgba(255,255,255,0) 45%)}
+
+/* tape (odd notes) */
+.skill-card-elegant::before{content:'';position:absolute;top:-17px;left:50%;width:96px;height:30px;background:rgba(255,255,255,.65);border:2px dashed rgba(16,19,26,.35);transform:translateX(-50%) rotate(-3deg)}
+/* push-pin (even notes) */
+.skill-card-elegant:nth-child(even)::before{top:-13px;width:24px;height:24px;border:2px solid var(--ink);border-radius:50%;background:#ff5a5f;box-shadow:2px 3px 0 var(--ink);transform:translateX(-50%)}
+/* folded corner */
+.skill-card-elegant::after{content:'';position:absolute;right:0;bottom:0;width:0;height:0;border-left:34px solid transparent;border-bottom:34px solid rgba(16,19,26,.2);border-bottom-right-radius:0}
+
+/* handwritten heading */
+.skill-header{padding-bottom:.6rem;border-bottom:2px dashed var(--ink)}
+.skill-title{font-family:'Caveat',cursive;font-size:2.3rem;font-weight:700;line-height:1;text-transform:none;letter-spacing:0}
+.skill-subtitle{font-family:'Caveat',cursive;font-size:1.3rem;font-weight:600;opacity:.8;transform:rotate(-2deg)}
+
+/* icons look like little stickers */
+.skill-icon-box{box-shadow:3px 3px 0 var(--ink);transform:rotate(-3deg)}
+.skill-item:nth-child(even) .skill-icon-box{transform:rotate(3deg)}
+.skill-item:hover .skill-icon-box{transform:rotate(0) translateY(-4px) scale(1.06)}
+
+@media(max-width:1024px){.skill-card-elegant,.skill-card-elegant:nth-child(n){transform:rotate(-1deg)}.skill-card-elegant:nth-child(even){transform:rotate(1deg)}}
+@media(prefers-reduced-motion:reduce){.skill-card-elegant:hover{transform:none}}
+
+
+/* ===== Skills: har note apne content ke size ka ===== */
+.skills-grid{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:3.2rem 2.4rem}
+.skill-card-elegant{flex:0 1 auto;width:fit-content;max-width:100%}
+
+/* thoda scattered board jaisa look */
+.skill-card-elegant:nth-child(3n+2){margin-top:1.4rem}
+.skill-card-elegant:nth-child(3n){margin-top:.4rem}
+
+/* ===== Skills: width skills ke hisaab se, rows poori fill ===== */
+.skills-grid{gap:3rem 1.6rem}
+.skill-items-row{gap:12px 10px}
+.skill-item{width:68px}
+.skill-icon-box{width:58px;height:58px;font-size:1.8rem}
+
+@media(min-width:1101px){
+  .skills-grid{display:grid;grid-template-columns:repeat(14,1fr);align-items:start;justify-content:stretch}
+  .skill-card-elegant{width:auto;max-width:none;margin-top:0}
+
+  /* row 1 */
+  .skill-card-elegant:nth-child(1){grid-column:1/6;grid-row:1}   /* Languages: 5 */
+  .skill-card-elegant:nth-child(2){grid-column:6/11;grid-row:1}  /* Frontend: 5 */
+  .skill-card-elegant:nth-child(4){grid-column:11/15;grid-row:1} /* Databases: 3 */
+  /* row 2 */
+  .skill-card-elegant:nth-child(3){grid-column:1/9;grid-row:2}   /* Backend: 7 */
+  .skill-card-elegant:nth-child(5){grid-column:9/15;grid-row:2}  /* Data Science: 5 */
+  /* row 3 */
+  .skill-card-elegant:nth-child(6){grid-column:1/5;grid-row:3}   /* AI: 4 */
+  .skill-card-elegant:nth-child(7){grid-column:5/10;grid-row:3}  /* Tools: 5 */
+  .skill-card-elegant:nth-child(8){grid-column:10/15;grid-row:3} /* Cloud: 5 */
+}
+
+/* ===== Projects: ek project = ek page ===== */
+.projects-carousel-container{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:1rem}
+.projects-grid{order:1;width:100%;gap:2rem;padding:2.4rem 8px 2rem;counter-reset:proj}
+
+.project-card.glass{min-width:100%;display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:2.6rem;align-items:start;padding:3rem 2.6rem 2.6rem;overflow:visible;position:relative;background:#fffdf7;counter-increment:proj}
+.project-info{padding:0}
+
+/* page number sticker */
+.project-card::after{content:'No. ' counter(proj,decimal-leading-zero);position:absolute;top:-18px;right:34px;background:var(--sun);border:2px solid var(--ink);border-radius:999px;padding:3px 16px;font-family:var(--head);font-weight:800;font-size:1rem;box-shadow:3px 3px 0 var(--ink);transform:rotate(4deg)}
+
+/* image taped on top */
+.project-image{position:relative;height:auto;aspect-ratio:16/11;padding:10px;background:#fff;border:2px solid var(--ink);border-radius:6px;box-shadow:var(--hard);overflow:visible;transform:rotate(-2deg);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.project-image img{border-radius:2px;object-position:top;transform:none!important}
+.project-image::before{content:'';position:absolute;top:-20px;left:50%;width:120px;height:34px;background:rgba(255,226,122,.8);border:2px dashed rgba(16,19,26,.4);transform:translateX(-50%) rotate(-3deg);z-index:2}
+
+/* content */
+.project-tags span{box-shadow:2px 2px 0 var(--ink)}
+.project-tags span:nth-child(4n+2){background:#cfd8ff}
+.project-tags span:nth-child(4n+3){background:#ffd0c2}
+.project-tags span:nth-child(4n+4){background:#c4f1d8}
+.project-info h3{display:inline-block;font-size:clamp(2rem,3.4vw,3rem);margin-bottom:1.2rem;background:linear-gradient(transparent 62%,var(--sun) 62%)}
+.project-info ul{font-size:1rem!important;gap:10px!important}
+.project-info li::marker{content:'\2726  ';color:var(--blue)}
+.project-links .btn-small{box-shadow:3px 3px 0 var(--ink);padding:10px 22px}
+.project-links .btn-small:hover{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+
+/* controls below the page */
+.carousel-btn{position:static;order:2}
+.carousel-btn.next{order:4}
+.project-counter{order:3;font-family:var(--head);font-weight:800;font-size:1.3rem;min-width:90px;text-align:center}
+
+@media(max-width:900px){
+  .project-card.glass{grid-template-columns:1fr;padding:2.6rem 1.3rem 1.8rem;gap:2rem}
+  .project-image{max-width:520px}
+}
+
+/* ===== Project image: hover pe hile ===== */.project-image{transition:transform 1.2s cubic-bezier(.34,1.4,.64,1);cursor:pointer}
+.project-card .project-image:hover{transform:rotate(0) scale(1.02);animation:img-wiggle 2.2s ease-in-out}
+@keyframes img-wiggle{
+  0%{transform:rotate(-2deg) scale(1.02)}
+  20%{transform:rotate(5deg) scale(1.02)}
+  40%{transform:rotate(-4deg) scale(1.02)}
+  60%{transform:rotate(3deg) scale(1.02)}
+  80%{transform:rotate(-1.5deg) scale(1.02)}
+  100%{transform:rotate(0) scale(1.02)}
+}
+
+@media(prefers-reduced-motion:reduce){.project-card .project-image:hover{animation:none}}
+
+/* ===== Skills: site ke fonts ke saath match ===== */
+.skill-title{font-family:var(--head);font-size:1.7rem;font-weight:800;letter-spacing:-.02em;text-transform:uppercase}
+.skill-subtitle{font-family:var(--body);font-size:.8rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;opacity:.75;transform:none}
