@@ -208,35 +208,78 @@ document.addEventListener('DOMContentLoaded', () => {
     if (statsSection) {
         statsObserver.observe(statsSection);
     }
+        // --- Projects: book layout ---
+    document.querySelectorAll('.project-card').forEach(card => {
+        const img = card.querySelector('.project-image');
+        const info = card.querySelector('.project-info');
+        const tags = card.querySelector('.project-tags');
+        if (!img || !info || !tags || card.querySelector('.page-left')) return;
 
-    // --- Projects Carousel Logic ---
-        // --- Projects Carousel Logic ---
+        ['tl', 'tr', 'bl', 'br'].forEach(pos => {
+            const tape = document.createElement('span');
+            tape.className = 'tape tape-' + pos;
+            img.appendChild(tape);
+        });
+
+        const left = document.createElement('div');
+        left.className = 'page-left';
+        left.append(img, tags);
+        info.classList.add('page-right');
+        card.insertBefore(left, info);
+    });
+   
+           // --- Projects: page turn ---
     const slider = document.getElementById('projects-slider');
     const prevBtn = document.getElementById('prev-project');
     const nextBtn = document.getElementById('next-project');
 
     if (slider && prevBtn && nextBtn) {
-        const cards = slider.querySelectorAll('.project-card');
+        const cards = [...slider.querySelectorAll('.project-card')];
         const counter = document.createElement('div');
         counter.className = 'project-counter';
         slider.parentElement.appendChild(counter);
 
-        const pageWidth = () => {
-            const gap = parseFloat(getComputedStyle(slider).columnGap) || 32;
-            return cards[0].getBoundingClientRect().width + gap;
-        };
+        let cur = 0, busy = false;
         const pad = n => String(n).padStart(2, '0');
         const update = () => {
-            const i = Math.min(cards.length - 1, Math.round(slider.scrollLeft / pageWidth()));
-            counter.textContent = pad(i + 1) + ' / ' + pad(cards.length);
-            prevBtn.style.opacity = i === 0 ? '.4' : '1';
-            nextBtn.style.opacity = i === cards.length - 1 ? '.4' : '1';
+            counter.textContent = pad(cur + 1) + ' / ' + pad(cards.length);
+            prevBtn.style.opacity = cur === 0 ? '.4' : '1';
+            nextBtn.style.opacity = cur === cards.length - 1 ? '.4' : '1';
+        };
+        cards[0].classList.add('is-active');
+        update();
+
+                const go = dir => {
+            const to = cur + dir;
+            if (busy || to < 0 || to >= cards.length) return;
+            busy = true;
+            const from = cards[cur], next = cards[to];
+            const skip = matchMedia('(max-width:900px)').matches ||
+                         matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            next.classList.add('is-under');
+
+            // palatne wale page ke peeche ka side = agle/pichle project ka asli page
+            let clone = null;
+            if (!skip) {
+                const src = next.querySelector(dir > 0 ? '.page-left' : '.page-right');
+                const host = from.querySelector(dir > 0 ? '.page-right' : '.page-left');
+                clone = src.cloneNode(true);
+                clone.classList.add('clone-face');
+                host.appendChild(clone);
+                from.classList.add(dir > 0 ? 'turn-next' : 'turn-prev');
+            }
+
+            setTimeout(() => {
+                from.classList.remove('is-active', 'turn-next', 'turn-prev');
+                next.classList.remove('is-under');
+                next.classList.add('is-active');
+                if (clone) clone.remove();
+                cur = to; busy = false; update();
+            }, skip ? 0 : 1400);
         };
 
-        prevBtn.addEventListener('click', () => slider.scrollBy({ left: -pageWidth(), behavior: 'smooth' }));
-        nextBtn.addEventListener('click', () => slider.scrollBy({ left: pageWidth(), behavior: 'smooth' }));
-        slider.addEventListener('scroll', update, { passive: true });
-        window.addEventListener('resize', update);
-        update();
+        prevBtn.addEventListener('click', () => go(-1));
+        nextBtn.addEventListener('click', () => go(1));
     }
 });
