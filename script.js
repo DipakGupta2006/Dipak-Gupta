@@ -213,19 +213,119 @@ document.addEventListener('DOMContentLoaded', () => {
         const img = card.querySelector('.project-image');
         const info = card.querySelector('.project-info');
         const tags = card.querySelector('.project-tags');
-        if (!img || !info || !tags || card.querySelector('.page-left')) return;
+        const title = info?.querySelector('h3');
+        const description = info?.querySelector('ul');
+        const links = info?.querySelector('.project-links');
+        if (!img || !info || !tags || !title || !description || !links || card.querySelector('.page-left')) return;
 
-        ['tl', 'tr', 'bl', 'br'].forEach(pos => {
-            const tape = document.createElement('span');
-            tape.className = 'tape tape-' + pos;
-            img.appendChild(tape);
+        const titleText = title.textContent.trim();
+        const editor = document.createElement('div');
+        editor.className = 'project-code-editor';
+        editor.setAttribute('aria-label', `${titleText} project summary`);
+
+        const editorBar = document.createElement('div');
+        editorBar.className = 'ed-bar';
+        ['r', 'y', 'g'].forEach(color => {
+            const dot = document.createElement('span');
+            dot.className = `dot ${color}`;
+            editorBar.appendChild(dot);
         });
+        const fileName = document.createElement('b');
+        fileName.textContent = `${titleText.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'project'}.js`;
+        editorBar.appendChild(fileName);
+        editor.appendChild(editorBar);
+
+        const editorBody = document.createElement('div');
+        editorBody.className = 'project-code-body';
+        editorBody.setAttribute('role', 'group');
+        const accessibleTitle = document.createElement('h3');
+        accessibleTitle.className = 'project-code-title';
+        accessibleTitle.textContent = titleText;
+        editorBody.appendChild(accessibleTitle);
+
+        const addCodeLine = (container, parts, caret = false) => {
+            const line = document.createElement('div');
+            line.className = 'l';
+            const content = document.createElement('span');
+            content.className = 'project-code-content';
+            parts.forEach(part => {
+                if (typeof part === 'string') {
+                    content.appendChild(document.createTextNode(part));
+                } else if (part instanceof Node) {
+                    content.appendChild(part);
+                } else {
+                    const token = document.createElement('span');
+                    token.className = part.className;
+                    token.textContent = part.text;
+                    content.appendChild(token);
+                }
+            });
+            if (caret) {
+                const cursor = document.createElement('span');
+                cursor.className = 'caret';
+                content.appendChild(cursor);
+            }
+            line.appendChild(content);
+            container.appendChild(line);
+        };
+        const token = (className, text) => ({ className, text });
+        const descriptionItems = [...description.querySelectorAll('li')]
+            .map(item => item.textContent.trim().replace(/\s+/g, ' '));
+
+        addCodeLine(editorBody, [token('k', 'const'), ' ', token('p', 'project'), ' = {']);
+        addCodeLine(editorBody, ['  ', token('p', 'name'), ': ', token('s', JSON.stringify(titleText)), ',']);
+        addCodeLine(editorBody, ['  ', token('p', 'output'), ': [']);
+        descriptionItems.forEach((text, index) => {
+            addCodeLine(editorBody, ['    ', token('s', JSON.stringify(text)), index < descriptionItems.length - 1 ? ',' : '']);
+        });
+        addCodeLine(editorBody, ['  ]']);
+        addCodeLine(editorBody, ['};'], true);
+        editor.appendChild(editorBody);
+
+        const highlightsEditor = document.createElement('div');
+        highlightsEditor.className = 'project-highlights-editor';
+        highlightsEditor.setAttribute('aria-label', `${titleText} technology highlights`);
+        const highlightsBar = editorBar.cloneNode(true);
+        highlightsBar.querySelector('b').textContent = 'highlights.js';
+        highlightsEditor.appendChild(highlightsBar);
+
+        const highlightsBody = document.createElement('div');
+        highlightsBody.className = 'project-code-body project-highlights-body';
+        const highlightValues = [...tags.querySelectorAll('span')].map(tag => tag.textContent.trim());
+        const highlightParts = [token('k', 'const'), ' ', token('p', 'highlights'), ' = [ '];
+        highlightValues.forEach((value, index) => {
+            highlightParts.push(token('s project-highlight-value', `${JSON.stringify(value)}${index < highlightValues.length - 1 ? ',' : ''}`));
+            if (index < highlightValues.length - 1) highlightParts.push(' ');
+        });
+        highlightParts.push(' ];');
+        addCodeLine(highlightsBody, highlightParts);
+        addCodeLine(highlightsBody, ['']);
+        addCodeLine(highlightsBody, [token('k', 'const'), ' ', token('p', 'projectLinks'), ' = {']);
+        [...links.querySelectorAll('a')].forEach((sourceLink, index, projectLinks) => {
+            const link = document.createElement('a');
+            link.className = 'project-code-link';
+            link.href = sourceLink.href;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.textContent = JSON.stringify(sourceLink.href);
+            addCodeLine(highlightsBody, [
+                '  ', token('p', JSON.stringify(sourceLink.textContent.trim())), ': ',
+                link, index < projectLinks.length - 1 ? ',' : ''
+            ]);
+        });
+        addCodeLine(highlightsBody, ['};'], true);
+        highlightsEditor.appendChild(highlightsBody);
 
         const left = document.createElement('div');
-        left.className = 'page-left';
-        left.append(img, tags);
-        info.classList.add('page-right');
-        card.insertBefore(left, info);
+        left.className = 'project-summary-panel';
+        left.appendChild(editor);
+
+        const right = document.createElement('div');
+        right.className = 'project-showcase-panel';
+        img.querySelector('img').alt = `${titleText} project preview`;
+        right.append(img, highlightsEditor);
+        info.remove();
+        card.append(left, right);
     });
    
            // --- Projects: page turn ---
@@ -254,29 +354,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (busy || to < 0 || to >= cards.length) return;
             busy = true;
             const from = cards[cur], next = cards[to];
-            const skip = matchMedia('(max-width:900px)').matches ||
-                         matchMedia('(prefers-reduced-motion: reduce)').matches;
-
             next.classList.add('is-under');
-
-            // palatne wale page ke peeche ka side = agle/pichle project ka asli page
-            let clone = null;
-            if (!skip) {
-                const src = next.querySelector(dir > 0 ? '.page-left' : '.page-right');
-                const host = from.querySelector(dir > 0 ? '.page-right' : '.page-left');
-                clone = src.cloneNode(true);
-                clone.classList.add('clone-face');
-                host.appendChild(clone);
-                from.classList.add(dir > 0 ? 'turn-next' : 'turn-prev');
-            }
+            from.classList.add('fade');
 
             setTimeout(() => {
-                from.classList.remove('is-active', 'turn-next', 'turn-prev');
+                from.classList.remove('is-active', 'fade');
                 next.classList.remove('is-under');
                 next.classList.add('is-active');
-                if (clone) clone.remove();
                 cur = to; busy = false; update();
-            }, skip ? 0 : 1400);
+            }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 260);
         };
 
         prevBtn.addEventListener('click', () => go(-1));
